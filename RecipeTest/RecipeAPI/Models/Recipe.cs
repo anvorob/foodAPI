@@ -8,7 +8,9 @@ namespace RecipeAPI.Models
         public Recipe()
         {
             CategoryToRecipe = new HashSet<CategoryToRecipe>();
+            Comment = new HashSet<Comment>();
             DietToRecipe = new HashSet<DietToRecipe>();
+            Favourite = new HashSet<Favourite>();
             IngredientsNavigation = new HashSet<Ingredients>();
             MealTypeToRecipe = new HashSet<MealTypeToRecipe>();
             Nutrition = new HashSet<Nutrition>();
@@ -26,7 +28,9 @@ namespace RecipeAPI.Models
         public string Cuisine { get; set; }
 
         public virtual ICollection<CategoryToRecipe> CategoryToRecipe { get; set; }
+        public virtual ICollection<Comment> Comment { get; set; }
         public virtual ICollection<DietToRecipe> DietToRecipe { get; set; }
+        public virtual ICollection<Favourite> Favourite { get; set; }
         public virtual ICollection<Ingredients> IngredientsNavigation { get; set; }
         public virtual ICollection<MealTypeToRecipe> MealTypeToRecipe { get; set; }
         public virtual ICollection<Nutrition> Nutrition { get; set; }

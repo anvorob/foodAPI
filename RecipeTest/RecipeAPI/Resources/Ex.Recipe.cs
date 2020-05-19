@@ -16,7 +16,7 @@ namespace RecipeAPI.Resources
         public int? NumberOfServings { get; set; }
         public int? CookTime { get; set; }
         public int? PrepTime { get; set; }
-        public string Instructions { get; set; }  // JSON blob (array of {text:"value", image:""})
+        public List<InstructionObj> Instructions { get; set; }  // JSON blob (array of {text:"value", image:""})
         public string Cuisine { get; set; }
         public List<Nutrition> Nutrition { get; set; }
         public List<MealType> MealTypeList { get; set; }
@@ -35,4 +35,18 @@ namespace RecipeAPI.Resources
         
     }
 
+    public class ExMisc
+    {
+        public List<Category> categoryList { get; set; }
+        public List<Diet> dietList { get; set; }
+        public List<MealType> mealTypeList { get; set; }
+
+        public List<string> units { get; set; }
+    }
+
+    public class InstructionObj
+    {
+        public string text { get; set; }
+        //public string image { get; set; }
+}
 }

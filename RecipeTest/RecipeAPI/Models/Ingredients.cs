@@ -8,7 +8,7 @@ namespace RecipeAPI.Models
     {
         public int Id { get; set; }
         public string Product { get; set; }
-        public int Quantity { get; set; }
+        public double? Quantity { get; set; }
         public string Units { get; set; }
         public int? Recipe { get; set; }
         [JsonIgnore]

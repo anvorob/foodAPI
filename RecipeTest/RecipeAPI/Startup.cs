@@ -35,6 +35,8 @@ namespace RecipeAPI
                                                   .AllowAnyMethod(); ;
                                   });
             });
+            services.AddControllersWithViews().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
             services.AddControllers();
         }
 

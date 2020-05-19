@@ -34,8 +34,8 @@ namespace RecipeAPI.Controllers
                 returnRecipe.DietList = con.Diet.Where(mt => mt.DietToRecipe.Any(mt1 => mt1.Recipe.Id == recipe.Id)).ToList();
                 returnRecipe.Image = recipe.Image;
                 returnRecipe.IngredientList = con.Ingredients.Where(nutr => nutr.Recipe.Value == recipe.Id).ToList();
-                returnRecipe.Ingredients = JsonConvert.SerializeObject(returnRecipe.IngredientList);
-                returnRecipe.Instructions = recipe.Instructions;
+                //returnRecipe.Ingredients = JsonConvert.SerializeObject(returnRecipe.IngredientList);
+                returnRecipe.Instructions = (!string.IsNullOrEmpty(recipe.Instructions))?JsonConvert.DeserializeObject<List<InstructionObj>>(recipe.Instructions):new List<InstructionObj>();
                 returnRecipe.MealTypeList = con.MealType.Where(mt => mt.MealTypeToRecipe.Any(mt1 => mt1.Recipe.Id == recipe.Id)).ToList();
                 returnRecipe.NumberOfServings = recipe.NumberOfServings;
                 returnRecipe.Nutrition = con.Nutrition.Where(nutr => nutr.Recipe.Value == recipe.Id).ToList();
@@ -48,6 +48,8 @@ namespace RecipeAPI.Controllers
         [HttpGet("{id}", Name = "Get")]
         public ActionResult Get(int id)
         {
+            if (id == 0)
+                return BadRequest("Id cannot be 0");
             try
             {
                 RecipeapiContext con = new RecipeapiContext();
@@ -66,7 +68,7 @@ namespace RecipeAPI.Controllers
                 returnRecipe.Image = recipe.Image;
                 returnRecipe.IngredientList = con.Ingredients.Where(nutr => nutr.Recipe.Value == recipe.Id).ToList();
                 returnRecipe.Ingredients = JsonConvert.SerializeObject(returnRecipe.IngredientList);
-                returnRecipe.Instructions = recipe.Instructions;
+                returnRecipe.Instructions = (!string.IsNullOrEmpty(recipe.Instructions)) ? JsonConvert.DeserializeObject<List<InstructionObj>>(recipe.Instructions) : new List<InstructionObj>(); ;
                 returnRecipe.MealTypeList = con.MealType.Where(mt => mt.MealTypeToRecipe.Any(mt1 => mt1.Recipe.Id == recipe.Id)).ToList();
                 returnRecipe.NumberOfServings = recipe.NumberOfServings;
                 returnRecipe.Nutrition = con.Nutrition.Where(nutr => nutr.Recipe.Value == recipe.Id).ToList();
@@ -78,7 +80,47 @@ namespace RecipeAPI.Controllers
                     return NotFound();
             }catch(Exception ex)
             {
-                return Ok(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Favourite/{isFavourite}")]
+        public ActionResult Favourite(Favourite favourite,bool isFavourite)
+        {
+            
+            if (favourite.RecipeId == 0 && favourite.UserId==0)
+                return BadRequest("Id cannot be 0");
+            try
+            {
+                RecipeapiContext con = new RecipeapiContext();
+                Recipe recipe = con.Recipe.FirstOrDefault(res => res.Id == favourite.RecipeId);
+                Users usr = con.Users.FirstOrDefault(usr => usr.Id == favourite.UserId);
+                //Favourite favourite22 = new Favourite();
+                //favourite22.RecipeId = favourite.RecipeId;
+                //favourite22.UserId = favourite.UserId;
+                //favourite22.Recipe = recipe;
+                //favourite22.User = usr;
+                if (recipe == null || usr == null)
+                    return BadRequest("Could not find one of entities");
+
+                if (con.Favourite.Any(fav => fav.RecipeId == favourite.RecipeId && fav.UserId == favourite.UserId) && !isFavourite) {
+                    con.Favourite.Remove(favourite);
+                    //usr.Favourite.Remove(favourite);
+                }
+                else {
+                    con.Favourite.Add(favourite);
+                    //usr.Favourite.Add(favourite22);
+                }
+                int result = con.SaveChanges();
+
+                if (result > 0)
+                    return Ok("Success");
+                else
+                    return BadRequest("Failed to update");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
@@ -104,12 +146,12 @@ namespace RecipeAPI.Controllers
 
             recipeObj.Name = recipe.name;
             recipeObj.Description = recipe.description;
-            //recipeObj.Ingredients = JsonConvert.SerializeObject(recipe.IngredientList);
+            recipeObj.Ingredients = null;// JsonConvert.SerializeObject(recipe.IngredientList);
             recipeObj.Image = recipe.Image;
             recipeObj.NumberOfServings = recipe.NumberOfServings;
             recipeObj.CookTime = recipe.CookTime;
             recipeObj.PrepTime = recipe.PrepTime;
-            recipeObj.Instructions = recipe.Instructions;
+            recipeObj.Instructions = JsonConvert.SerializeObject(recipe.Instructions);
             recipeObj.Cuisine = recipe.Cuisine;
             //recipeObj.IngredientsNavigation = ingrList;
                 
@@ -359,6 +401,26 @@ namespace RecipeAPI.Controllers
             collection.dietList = dietList;
 
             return Ok(collection);
+        }
+
+        [HttpGet("Misc")]
+        public ActionResult Misc()
+        {
+            
+            RecipeapiContext con = new RecipeapiContext();
+            ExMisc mics = new ExMisc();
+            mics.categoryList = con.Category.ToList();
+            mics.dietList = con.Diet.ToList();
+            mics.mealTypeList = con.MealType.ToList();
+            mics.units = new List<string>() { "g", "mg", "tblspoon", "tspoon", "ng", "µg", "cup", "pound","pcs", "1/4", "1/3","1/2", "2/3", "3/4" };
+            return Ok(JsonConvert.SerializeObject(mics));
+        }
+
+        [HttpGet("Search")]
+        public ActionResult<List<Recipe>> Search(string searchWord)
+        {
+            RecipeapiContext con = new RecipeapiContext();
+            return con.Recipe.Where(rec => rec.Name.Contains(searchWord) || rec.Description.Contains(searchWord)).ToList();
         }
     }
 }

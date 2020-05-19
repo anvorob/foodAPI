@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace RecipeAPI.Models
@@ -13,7 +12,7 @@ namespace RecipeAPI.Models
 
         public int Id { get; set; }
         public string Name { get; set; }
-        [JsonIgnore]
+
         public virtual ICollection<CategoryToRecipe> CategoryToRecipe { get; set; }
     }
 }
